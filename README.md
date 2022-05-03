@@ -1,46 +1,58 @@
-# Getting Started with Create React App
+## React VanillaState
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Musings on how to enable use of vanilla JS classes to track state in React components. Avoid React specific logic within the state management classes that define state and mutations.
 
-## Available Scripts
+### Sample API
 
-In the project directory, you can run:
+The intent is to decouple state logic from React code, such that you can write something that is easier to reason about, without reference to specifics of the React framework. In an ideal world, I would be able to do something like this:
 
-### `npm start`
+```typescript
+import { VanillaState, useVanillaState } from "./module"
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+class Counter extends VanillaState {
+  count = 0
+  get state() {
+    return this.count
+  }
+  increment() {
+    this.count += 1
+    return this
+  }
+  decrement() {
+    this.count -= 1
+    return this
+  }
+}
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+export default function App() {
+  const counter = useVanillaState(Counter)
 
-### `npm test`
+  return (
+    <div className="App">
+      {counter.state}
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+      <button
+        onClick={() => {
+          // Sample state change chain
+          // with rerender() after mutations are done:
+          counter.increment().decrement().increment().rerender()
+        }}
+      >
+        inc
+      </button>
+    </div>
+  )
+}
+```
 
-### `npm run build`
+### Try it locally
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+$ git clone ...
+$ cd use-vanilla-state
+$ yarn install && yarn start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Click the button to increment the count, proving that this sample module can at least work in the simplest of cases.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+![app-example](./assets/screenshot.png)

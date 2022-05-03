@@ -1,26 +1,37 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { VanillaState, useVanillaState } from "./module"
+import "./App.css"
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class Counter extends VanillaState {
+  count = 0
+  get state() {
+    return this.count
+  }
+  increment() {
+    this.count += 1
+    return this
+  }
+  decrement() {
+    this.count -= 1
+    return this
+  }
 }
 
-export default App;
+export default function App() {
+  const counter = useVanillaState(Counter)
+
+  return (
+    <div className="App">
+      {counter.state}
+
+      <button
+        onClick={() => {
+          // Sample state change chain
+          // with rerender() after mutations are done:
+          counter.increment().decrement().increment().rerender()
+        }}
+      >
+        inc
+      </button>
+    </div>
+  )
+}
