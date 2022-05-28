@@ -1,58 +1,70 @@
 ## React VanillaState
 
-Musings on how to enable use of vanilla JS classes to track state in React components. Avoid React specific logic within the state management classes that define state and mutations.
+Enable use of regular javascript classes to track state in React components. Avoid React specific logic within the state management layer.
 
-### Sample API
+### Install
 
-The intent is to decouple state logic from React code, such that you can write something that is easier to reason about, without reference to specifics of the React framework. In an ideal world, I would be able to do something like this:
+```
+$ npm install use-vanilla-state
+```
+
+### Example
+
+The intent is to decouple state logic from React, such that you can write something that is easy to reason about, with little reference to specifics of the React framework:
 
 ```typescript
-import { VanillaState, useVanillaState } from "./module"
+import { VanillaState, useVanillaState, rerender } from "use-vanilla-state"
 
 class Counter extends VanillaState {
-  count = 0
+  private count = 0
+  private secret = "secret"
+
   get state() {
-    return this.count
+    return {
+      count: this.count,
+      secret: this.secret
+    } as const
   }
-  increment() {
+
+  // decorator induces a rerender
+  // when this method is called:
+  @rerender
+  increase() {
     this.count += 1
     return this
   }
-  decrement() {
-    this.count -= 1
+
+  // if no decorator, then you can make independent
+  // changes from the react rerender cycle:
+  silent(s: string) {
+    this.secret = s
     return this
   }
 }
 
 export default function App() {
-  const counter = useVanillaState(Counter)
+  const myCounter = useVanillaState(Counter)
 
   return (
-    <div className="App">
-      {counter.state}
+    <div className="app">
+      {myCounter.state.count}
 
       <button
         onClick={() => {
-          // Sample state change chain
-          // with rerender() after mutations are done:
-          counter.increment().decrement().increment().rerender()
+          myCounter.increase()
         }}
       >
-        inc
+        increase
+      </button>
+
+      <button
+        onClick={() => {
+          myCounter.silent("new secret").increase()
+        }}
+      >
+        chain
       </button>
     </div>
   )
 }
 ```
-
-### Try it locally
-
-```bash
-$ git clone ...
-$ cd use-vanilla-state
-$ yarn install && yarn start
-```
-
-Click the button to increment the count, proving that this sample module can at least work in the simplest of cases.
-
-![app-example](./assets/screenshot.png)

@@ -1,8 +1,23 @@
 {
-  "name": "connect-four",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.4.2",
+  "name": "use-vanilla-state",
+  "author": "jaimefps (https://github.com/jaimefps)",
+  "license": "MIT",
+  "main": "./module.js",
+  "homepage": "https://github.com/jaimefps/use-vanilla-state",
+  "bugs": {
+    "url": "https://github.com/jaimefps/use-vanilla-state/issues"
+  },
+  "keywords": [
+    "state",
+    "react-hook",
+    "react"
+  ],
   "dependencies": {
+    "react": "^18.1.0"
+  },
+  "devDependencies": {
+    "react-dom": "^18.1.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
@@ -10,17 +25,19 @@
     "@types/node": "^16.11.31",
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.0",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
     "react-scripts": "5.0.1",
-    "typescript": "^4.6.3",
-    "web-vitals": "^2.1.4"
+    "typescript": "^4.6.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "clean": "rm -rf dist",
+    "build-module": "tsc --project tsconfig.prod.json ",
+    "build-docs": "cp package.json README.md ./dist",
+    "prep": "yarn clean && yarn build-module && yarn build-docs",
+    "pub": "yarn prep && yarn publish ./dist"
   },
   "eslintConfig": {
     "extends": [
