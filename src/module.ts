@@ -22,7 +22,7 @@ export function useVanillaState<T extends VanillaState>(
 
   // stable ref for state instance:
   const [instance] = useState(() => {
-    const rerender = () => {
+    const rerender: RenderInducer = () => {
       setNum((num) => num + 1)
     }
     return new CustomState(rerender)
