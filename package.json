@@ -1,5 +1,5 @@
 {
-  "version": "0.4.4",
+  "version": "0.5.0",
   "name": "use-vanilla-state",
   "author": "jaimefps (https://github.com/jaimefps)",
   "license": "MIT",
@@ -17,8 +17,6 @@
     "react": ">=16.8.0"
   },
   "devDependencies": {
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
@@ -26,6 +24,10 @@
     "@types/node": "^16.11.31",
     "@types/react": "^18.0.8",
     "@types/react-dom": "^18.0.0",
+    "cypress": "^9.7.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.6.3"
   },
@@ -35,15 +37,16 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -rf dist",
-    "build-module": "tsc --project tsconfig.prod.json ",
     "build-docs": "cp package.json README.md ./dist",
-    "prep": "yarn clean && yarn build-module && yarn build-docs",
+    "build-module": "tsc --project tsconfig.prod.json ",
+    "prep": "yarn clean && yarn build-module && yarn build-docs && yarn test --watchAll=false && yarn cypress run",
     "pub": "yarn prep && yarn publish ./dist"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest"
+      "react-app/jest",
+      "plugin:cypress/recommended"
     ]
   },
   "browserslist": {
