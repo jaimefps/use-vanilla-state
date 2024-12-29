@@ -1,6 +1,6 @@
 ## React VanillaState
 
-Enable use of regular javascript classes to track state in React components. Avoid React specific logic within the state management layer.
+Enable use of regular javascript classes to track state in React components. Avoid React specific logic within the state management layer. MobX would be the correct approach to using something like this idea. This is just a very simple implementation of the concept of classes for state management.
 
 ### Install
 
