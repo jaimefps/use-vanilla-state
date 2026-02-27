@@ -293,26 +293,72 @@ state.setB(2)  // re-renders with a=1, b=2
 
 ### Testing state classes
 
-Since your state is a plain class, you can unit test it without React:
+This is the core idea behind the library: your state is a plain class, so you can unit test all your logic without React, without `renderHook`, without `act()`, and without jsdom. Just instantiate and assert.
 
 ```typescript
 import { describe, it, expect } from "vitest"
+import { VanillaState, rerender } from "use-vanilla-state"
 
-describe("Counter", () => {
-  it("increments count", () => {
-    const counter = new Counter()
-    counter.increment()
-    expect(counter.count).toBe(1)
+class TodoState extends VanillaState {
+  items: { text: string; done: boolean }[] = []
+
+  @rerender
+  add(text: string) {
+    this.items.push({ text, done: false })
+  }
+
+  @rerender
+  toggle(index: number) {
+    this.items[index].done = !this.items[index].done
+  }
+
+  @rerender
+  removeCompleted() {
+    this.items = this.items.filter((item) => !item.done)
+  }
+
+  get remaining() {
+    return this.items.filter((item) => !item.done).length
+  }
+}
+
+describe("TodoState", () => {
+  it("adds items", () => {
+    const state = new TodoState()
+    state.add("Buy milk")
+    state.add("Walk dog")
+    expect(state.items).toHaveLength(2)
+    expect(state.items[0].text).toBe("Buy milk")
+  })
+
+  it("toggles completion", () => {
+    const state = new TodoState()
+    state.add("Buy milk")
+    state.toggle(0)
+    expect(state.items[0].done).toBe(true)
+    expect(state.remaining).toBe(0)
+  })
+
+  it("removes completed items", () => {
+    const state = new TodoState()
+    state.add("Buy milk")
+    state.add("Walk dog")
+    state.toggle(0)
+    state.removeCompleted()
+    expect(state.items).toHaveLength(1)
+    expect(state.items[0].text).toBe("Walk dog")
   })
 })
 ```
 
-For shared stores, use `getInstance()`:
+No React imports, no DOM, no async rendering quirks. These tests run in milliseconds.
+
+For shared stores, use `getInstance()` to test imperatively:
 
 ```typescript
-const store = createVanillaStore(Counter)
-store.getInstance().increment()
-expect(store.getInstance().count).toBe(1)
+const store = createVanillaStore(TodoState)
+store.getInstance().add("Test item")
+expect(store.getInstance().items).toHaveLength(1)
 ```
 
 ## Migration from v0.x
