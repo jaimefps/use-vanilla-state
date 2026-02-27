@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { VanillaState, useVanillaState, rerender } from "./module"
 import "./App.css"
 
