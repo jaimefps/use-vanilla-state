@@ -1,9 +1,10 @@
 {
-  "version": "0.5.0",
+  "version": "0.5.0-alpha-experimental-codex.0",
   "name": "use-vanilla-state",
   "author": "jaimefps (https://github.com/jaimefps)",
   "license": "MIT",
-  "main": "./module.js",
+  "main": "./dist/module.js",
+  "types": "./dist/module.d.ts",
   "homepage": "https://github.com/jaimefps/use-vanilla-state",
   "bugs": {
     "url": "https://github.com/jaimefps/use-vanilla-state/issues"
@@ -17,19 +18,30 @@
     "react": ">=16.8.0"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.1.1",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.4.1",
-    "@types/node": "^16.11.31",
-    "@types/react": "^18.0.8",
-    "@types/react-dom": "^18.0.0",
-    "cypress": "^9.7.0",
-    "eslint-plugin-cypress": "^2.12.1",
-    "react": "^18.1.0",
-    "react-dom": "^18.1.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.6.3"
+    "@playwright/test": "^1.58.2",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "baseline-browser-mapping": "^2.10.0",
+    "caniuse-lite": "^1.0.30001774",
+    "cypress": "^15.11.0",
+    "eslint": "^8.57.1",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-cypress": "3.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-scripts": "^5.0.1",
+    "serve": "^14.2.5",
+    "start-server-and-test": "^2.1.5",
+    "typescript": "^5.9.3"
+  },
+  "resolutions": {
+    "fork-ts-checker-webpack-plugin": "7.2.13"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -37,11 +49,20 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": "rm -rf dist",
-    "build-docs": "cp package.json README.md ./dist",
+    "prepack": "yarn build-module && yarn build-docs",
+    "build-docs": "node scripts/build-package-json.js && cp README.md LICENSE ./dist",
     "build-module": "tsc --project tsconfig.prod.json ",
-    "prep": "yarn clean && yarn build-module && yarn build-docs && yarn test --watchAll=false && yarn cypress run",
+    "serve:build": "serve -s build -l 3000",
+    "test:e2e:cypress": "start-server-and-test \"PUBLIC_URL=/ yarn build && yarn serve:build\" http://localhost:3000 \"cypress run\"",
+    "test:e2e:playwright": "playwright test",
+    "prep": "yarn clean && yarn build-module && yarn build-docs && yarn test --watchAll=false && yarn test:e2e:cypress && yarn test:e2e:playwright",
     "pub": "yarn prep && yarn publish ./dist"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -60,5 +81,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "dependencies": {}
 }
