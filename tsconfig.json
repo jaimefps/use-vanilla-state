@@ -7,9 +7,9 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "outDir": "dist",
-    "target": "es6",
+    "target": "es2020",
     "module": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "bundler"
   },
   "include": ["src"],
   "exclude": ["node_modules"]

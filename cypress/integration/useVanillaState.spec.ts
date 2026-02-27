@@ -2,7 +2,7 @@
 
 describe("useVanillaState", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:3000")
+    cy.visit("http://localhost:5173")
   })
 
   it("updates view when @rerender:increase() is called", () => {
@@ -27,5 +27,11 @@ describe("useVanillaState", () => {
     cy.get("#silent-action").click()
     cy.get("#secret-view").should("have.text", "secret")
     cy.get("#count-view").should("have.text", 0)
+  })
+
+  it("shared store updates across components", () => {
+    cy.get("#shared-view").should("have.text", "shared: 0")
+    cy.get("#shared-action").click()
+    cy.get("#shared-view").should("have.text", "shared: 1")
   })
 })

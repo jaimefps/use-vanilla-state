@@ -1,4 +1,9 @@
-import { VanillaState, useVanillaState, rerender } from "./module"
+import {
+  VanillaState,
+  useVanillaState,
+  rerender,
+  createVanillaStore,
+} from "../lib"
 import "./App.css"
 
 class Counter extends VanillaState {
@@ -7,7 +12,7 @@ class Counter extends VanillaState {
   get state() {
     return {
       count: this.count,
-      secret: this.secret
+      secret: this.secret,
     } as const
   }
   @rerender
@@ -24,6 +29,30 @@ class Counter extends VanillaState {
     this.secret = s
     return this
   }
+}
+
+class SharedCounter extends VanillaState {
+  count = 0
+  @rerender
+  increment() {
+    this.count++
+  }
+}
+
+const sharedStore = createVanillaStore(SharedCounter)
+
+function SharedDisplay() {
+  const shared = sharedStore.useStore()
+  return <div id="shared-view">shared: {shared.count}</div>
+}
+
+function SharedButton() {
+  const shared = sharedStore.useStore()
+  return (
+    <button id="shared-action" onClick={() => shared.increment()}>
+      shared +1
+    </button>
+  )
 }
 
 export default function App() {
@@ -60,6 +89,10 @@ export default function App() {
       >
         silent
       </button>
+
+      <hr />
+      <SharedDisplay />
+      <SharedButton />
     </div>
   )
 }
