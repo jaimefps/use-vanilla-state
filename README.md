@@ -216,24 +216,59 @@ type VanillaStore<T> = {
 - Cypress E2E: `yarn test:e2e:cypress`
 - Playwright E2E: `yarn test:e2e:playwright`
 
-`createState<T>(initial: T | (() => T))`
-Creates a standalone store with `get`, `set`, `mutate`, and `subscribe`.
-Use `set` for immutable updates and `mutate` for in-place updates.
+### Unit Testing State Logic (Without React)
 
-`useVanillaValue<T>(store: VanillaStore<T>)`
-React hook that subscribes to a store and returns its current value.
+You can test class/state logic as plain JavaScript without rendering components.
 
-`useVanillaStore<T>(store: VanillaStore<T>)`
-React hook that returns `[value, set, mutate]`.
+```typescript
+import { VanillaState, rerender } from "use-vanilla-state"
 
-`useVanillaLocalState<T>(initial: T | (() => T))`
-React hook that creates and owns a local store, returning `[value, set, mutate, store]`.
+class CounterState extends VanillaState {
+  private count = 0
 
-`VanillaState`
-Base class for class-style state objects that can trigger React renders.
+  get value() {
+    return this.count
+  }
 
-`useVanillaState(CustomState)`
-Hook that instantiates a `VanillaState` subclass and wires it to React renders.
+  @rerender
+  increase() {
+    this.count += 1
+  }
+}
 
-`@rerender`
-Method decorator that triggers a React re-render after method execution.
+test("CounterState increments without rendering React", () => {
+  let rerenders = 0
+  const state = new CounterState(() => {
+    rerenders += 1
+  })
+
+  state.increase()
+  state.increase()
+
+  expect(state.value).toBe(2)
+  expect(rerenders).toBe(2)
+})
+```
+
+Standalone stores are also testable without React:
+
+```typescript
+import { createState } from "use-vanilla-state"
+
+test("createState set and mutate work in plain unit tests", () => {
+  const store = createState({ count: 0 })
+  let notifications = 0
+  const unsubscribe = store.subscribe(() => {
+    notifications += 1
+  })
+
+  store.set((prev) => ({ count: prev.count + 1 }))
+  store.mutate((draft) => {
+    draft.count += 1
+  })
+  unsubscribe()
+
+  expect(store.get().count).toBe(2)
+  expect(notifications).toBe(2)
+})
+```
