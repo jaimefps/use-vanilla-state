@@ -5,9 +5,8 @@
     "jsx": "react-jsx",
     "declaration": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true,
     "outDir": "dist",
-    "target": "es2020",
+    "target": "es2022",
     "module": "esnext",
     "moduleResolution": "bundler"
   },

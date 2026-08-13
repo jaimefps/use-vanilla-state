@@ -1,6 +1,6 @@
 import { useRef, useSyncExternalStore, useCallback } from "react"
 import { VanillaState, VanillaStateClass } from "./VanillaState"
-import { registerInstance, getInternals } from "./internals"
+import { getInternals, subscribeInternal } from "./internals"
 
 export function useVanillaState<T extends VanillaState>(
   StateClass: VanillaStateClass<T>
@@ -8,23 +8,16 @@ export function useVanillaState<T extends VanillaState>(
   const instanceRef = useRef<T | null>(null)
   if (instanceRef.current === null) {
     instanceRef.current = new StateClass()
-    registerInstance(instanceRef.current)
   }
   const instance = instanceRef.current
 
   const subscribe = useCallback(
-    (listener: () => void) => {
-      const internals = getInternals(instance)!
-      internals.listeners.add(listener)
-      return () => {
-        internals.listeners.delete(listener)
-      }
-    },
+    (listener: () => void) => subscribeInternal(instance, listener),
     [instance]
   )
 
   const getSnapshot = useCallback(() => {
-    return getInternals(instance)!.version
+    return getInternals(instance).version
   }, [instance])
 
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot)

@@ -5,23 +5,31 @@ export type StoreInternals = {
 
 const registry = new WeakMap<object, StoreInternals>()
 
-export function registerInstance(instance: object): StoreInternals {
-  const internals: StoreInternals = {
-    version: 0,
-    listeners: new Set(),
+export function getInternals(instance: object): StoreInternals {
+  let internals = registry.get(instance)
+  if (!internals) {
+    internals = {
+      version: 0,
+      listeners: new Set(),
+    }
+    registry.set(instance, internals)
   }
-  registry.set(instance, internals)
   return internals
 }
 
-export function getInternals(instance: object): StoreInternals | undefined {
-  return registry.get(instance)
+export function subscribeInternal(
+  instance: object,
+  listener: () => void
+): () => void {
+  const internals = getInternals(instance)
+  internals.listeners.add(listener)
+  return () => {
+    internals.listeners.delete(listener)
+  }
 }
 
 export function notifySubscribers(instance: object): void {
-  const internals = registry.get(instance)
-  if (internals) {
-    internals.version++
-    internals.listeners.forEach((listener) => listener())
-  }
+  const internals = getInternals(instance)
+  internals.version++
+  internals.listeners.forEach((listener) => listener())
 }

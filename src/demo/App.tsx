@@ -2,6 +2,7 @@ import {
   VanillaState,
   useVanillaState,
   rerender,
+  notify,
   createVanillaStore,
 } from "../lib"
 import "./App.css"
@@ -40,6 +41,27 @@ class SharedCounter extends VanillaState {
 }
 
 const sharedStore = createVanillaStore(SharedCounter)
+
+// Decorator-free counter — plain JS with notify(this)
+class PlainCounter extends VanillaState {
+  count = 0
+  increment() {
+    this.count++
+    notify(this)
+  }
+}
+
+function PlainSection() {
+  const plain = useVanillaState(PlainCounter)
+  return (
+    <>
+      <div id="plain-view">plain: {plain.count}</div>
+      <button id="plain-action" onClick={() => plain.increment()}>
+        plain +1
+      </button>
+    </>
+  )
+}
 
 function SharedDisplay() {
   const shared = sharedStore.useStore()
@@ -93,6 +115,9 @@ export default function App() {
       <hr />
       <SharedDisplay />
       <SharedButton />
+
+      <hr />
+      <PlainSection />
     </div>
   )
 }

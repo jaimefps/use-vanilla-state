@@ -1,4 +1,5 @@
 export { VanillaState, type VanillaStateClass } from "./VanillaState"
 export { rerender } from "./rerender"
+export { notify, subscribe } from "./vanilla"
 export { useVanillaState } from "./useVanillaState"
 export { createVanillaStore } from "./createVanillaStore"

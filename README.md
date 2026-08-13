@@ -2,6 +2,8 @@
 
 Manage React component state using plain JavaScript classes. Write state logic with zero React-specific APIs, then connect it to your components with a single hook.
 
+Your state is a class you could paste into a Node REPL: instantiate it, call methods, assert on fields — no store config, no reducers, no selectors, no proxies. The library's whole job is telling React *when* to look, via a decorator (`@rerender`), a plain function call (`notify(this)`), or a framework-agnostic `subscribe`.
+
 ## Install
 
 ```
@@ -109,10 +111,47 @@ class FormState extends VanillaState {
 **Behavior details:**
 
 - **Sync methods**: Re-render fires immediately after the method returns. If the method throws, no re-render occurs (the state mutation is likely incomplete).
-- **Async methods**: Re-render fires after the returned promise resolves or rejects. This means your component reflects the final state of the async operation, not intermediate states.
-- **Non-VanillaState classes**: Throws an error at call time if `@rerender` is used on a class that does not extend `VanillaState`.
+- **Async methods**: Re-render fires twice — once synchronously when the method reaches its first `await` (so loading flags and optimistic values render immediately), and again after the returned promise resolves or rejects. In the `submit()` example above, `submitting = true` is visible while the fetch is in flight.
+- **Non-VanillaState classes**: Throws an error at call time if `@rerender` is used on a class that does not extend `VanillaState`, or if the method was detached from its instance (e.g. passed as an unbound callback).
 
-> **Note:** TypeScript requires `"experimentalDecorators": true` in your `tsconfig.json` to use decorator syntax.
+> **Note:** `@rerender` supports both standard ECMAScript decorators (the TypeScript 5+ default — no configuration needed) and legacy `experimentalDecorators` mode. If you can't use decorators at all — for example in plain JavaScript with no build step — use [`notify`](#notifyinstance) instead.
+
+### `notify(instance)`
+
+Imperatively notify subscribers that an instance changed. This is the decorator-free alternative to `@rerender`: mutate your state, then call `notify(this)`. Because it's just a function call, it works in plain JavaScript with no build step, no TypeScript, and no decorator support at all — the most vanilla form of the library.
+
+```javascript
+import { VanillaState, useVanillaState, notify } from "use-vanilla-state"
+
+class Counter extends VanillaState {
+  count = 0
+
+  increment() {
+    this.count++
+    notify(this)
+  }
+}
+```
+
+`notify` and `@rerender` are interchangeable — pick per method, or use `notify` everywhere if you prefer zero decorators. `notify(this)` mid-method also lets you surface intermediate states that a single decorator can't express.
+
+### `subscribe(instance, listener)`
+
+Subscribe to changes on any `VanillaState` instance outside of React. The listener fires whenever `@rerender` or `notify` announces a change. Returns an unsubscribe function.
+
+```typescript
+import { subscribe } from "use-vanilla-state"
+
+const counter = new Counter()
+const unsubscribe = subscribe(counter, () => {
+  console.log("count is now", counter.count)
+})
+
+counter.increment() // logs: count is now 1
+unsubscribe()
+```
+
+Your state classes are plain JS, and with `subscribe` the reactivity is too — usable from vanilla DOM code, tests, or any other framework. React components remain just one kind of subscriber.
 
 ### `useVanillaState(StateClass)`
 
@@ -395,17 +434,14 @@ class Counter extends VanillaState {
 }
 ```
 
-## TypeScript Setup
+## TypeScript / Decorator Setup
 
-Add `experimentalDecorators` to your `tsconfig.json`:
+No configuration is required. `@rerender` implements both decorator conventions:
 
-```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true
-  }
-}
-```
+- **Standard ECMAScript decorators** — the default in TypeScript 5+, Babel (`@babel/plugin-proposal-decorators` with `version: "2023-05"`), esbuild, and SWC. Works out of the box.
+- **Legacy decorators** — if your project still sets `"experimentalDecorators": true`, that works too.
+
+If your toolchain supports neither (or you write plain untranspiled JavaScript), skip decorators entirely and use [`notify(this)`](#notifyinstance) — it is functionally identical.
 
 ## License
 

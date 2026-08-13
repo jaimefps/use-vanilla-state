@@ -1,22 +1,18 @@
 import { useSyncExternalStore } from "react"
 import { VanillaState, VanillaStateClass } from "./VanillaState"
-import { registerInstance } from "./internals"
+import { getInternals, subscribeInternal } from "./internals"
 
 export function createVanillaStore<T extends VanillaState>(
   StateClass: VanillaStateClass<T>
 ): { useStore: () => T; getInstance: () => T } {
   const instance = new StateClass()
-  const internals = registerInstance(instance)
 
   function subscribe(listener: () => void): () => void {
-    internals.listeners.add(listener)
-    return () => {
-      internals.listeners.delete(listener)
-    }
+    return subscribeInternal(instance, listener)
   }
 
   function getSnapshot(): number {
-    return internals.version
+    return getInternals(instance).version
   }
 
   function useStore(): T {

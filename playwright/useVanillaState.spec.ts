@@ -34,4 +34,10 @@ test.describe("useVanillaState", () => {
     await page.click("#shared-action")
     await expect(page.locator("#shared-view")).toHaveText("shared: 1")
   })
+
+  test("updates view via decorator-free notify(this)", async ({ page }) => {
+    await expect(page.locator("#plain-view")).toHaveText("plain: 0")
+    await page.click("#plain-action")
+    await expect(page.locator("#plain-view")).toHaveText("plain: 1")
+  })
 })
